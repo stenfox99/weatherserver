@@ -6,9 +6,11 @@ import by.bsuir.weather.dao.WeatherDAO;
 import by.bsuir.weather.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class WeatherService_Impl implements WeatherService {
@@ -29,6 +31,7 @@ public class WeatherService_Impl implements WeatherService {
         if (!weatherDAO.update(object, id)) {
             throw new NotFoundException("Selected weather wasn't found");
         }
+        object.setId(id);
         return object;
     }
 
@@ -45,5 +48,41 @@ public class WeatherService_Impl implements WeatherService {
     @Override
     public List<Weather> getObjects() {
         return weatherDAO.getObjects();
+    }
+
+    @Override
+    public List<Weather> getWeatherByCity(String name) {
+        return weatherDAO.getWeatherByCity(name);
+    }
+
+    @Override
+    public List<Weather> getWeatherByDate(LocalDate date) {
+        return weatherDAO.getWeatherByDate(date);
+    }
+
+    @Override
+    public List<Weather> getObjects(LocalDate date, String city) {
+        List<Weather> weathersInCity = new ArrayList<>();
+        List<Weather> weathersOnDate = new ArrayList<>();
+
+        if (Objects.nonNull(date)) {
+            weathersOnDate = getWeatherByDate(date.plusDays(1));                              //plus day can be removed, related with db settings
+        }
+
+        if (!StringUtils.isEmpty(city)) {
+            weathersInCity = getWeatherByCity(city);
+        }
+
+        if (Objects.nonNull(date) && !StringUtils.isEmpty(city)) {
+            List<Weather> result = new ArrayList<>(weathersOnDate);
+            result.retainAll(weathersInCity);
+            return result;
+        } else if (Objects.nonNull(date) && StringUtils.isEmpty(city)) {
+            return weathersOnDate;
+        } else if (Objects.isNull(date) && !StringUtils.isEmpty(city)) {
+            return weathersInCity;
+        } else {
+            return getObjects();
+        }
     }
 }

@@ -7,8 +7,16 @@ import by.bsuir.weather.model.exception.NotFoundException;
 import by.bsuir.weather.model.exception.SaveException;
 import by.bsuir.weather.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import javax.ws.rs.QueryParam;
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(value = "/v1/weather")
@@ -45,8 +53,7 @@ public class WeatherController {
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteWeather(@PathVariable("id") Long id) {
-        System.out.println(111111);
-        if (weatherService.delete(id)) {
+        if (!weatherService.delete(id)) {
             throw new NotFoundException("Selected wasn't wasn't found");
         }
 
@@ -63,7 +70,11 @@ public class WeatherController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public String getWeathers() {
-        return "aaaaaa";
+    public List<WeatherDTO> getWeathers(@QueryParam("date") @DateTimeFormat(pattern="yyyy-MM-dd") Date date,
+                                        @QueryParam("city") String city) {
+        List<Weather> weathers =
+                weatherService
+                        .getObjects(Objects.nonNull(date) ? new java.sql.Date(date.getTime()).toLocalDate() : null, city);
+        return weatherConverter.convertToDTO(weathers);
     }
 }

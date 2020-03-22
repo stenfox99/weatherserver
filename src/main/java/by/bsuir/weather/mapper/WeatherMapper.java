@@ -3,8 +3,10 @@ package by.bsuir.weather.mapper;
 import by.bsuir.weather.model.entity.Weather;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class WeatherMapper implements RowMapper<Weather> {
 
@@ -26,7 +28,10 @@ public class WeatherMapper implements RowMapper<Weather> {
 
         weather.setId(resultSet.getLong(ID));
         weather.setCity(resultSet.getString(CITY));
-        weather.setDateWeather(resultSet.getDate(DATE_WEATHER).toLocalDate());
+
+        Date dateWeather = resultSet.getDate(DATE_WEATHER);
+        weather.setDateWeather(dateWeather != null ? dateWeather.toLocalDate() : null);
+
         weather.setTemp(resultSet.getBigDecimal(TEMP));
         weather.setWindSpeed(resultSet.getBigDecimal(WIND_SPEED));
         weather.setPressure(resultSet.getLong(PRESSURE));
@@ -34,6 +39,7 @@ public class WeatherMapper implements RowMapper<Weather> {
         weather.setDescription(resultSet.getString(WEATHER_DESCRIPTION));
         weather.setAirQuality(resultSet.getBigDecimal(AIR_QUALITY));
         weather.setDeleted(resultSet.getBoolean(IS_DELETED));
+
         weather.setCreatedDate(resultSet.getDate(CREATED_DATE).toLocalDate());
 
         return weather;

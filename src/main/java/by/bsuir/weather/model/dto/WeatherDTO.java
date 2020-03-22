@@ -11,6 +11,7 @@ import java.time.LocalDate;
 
 public class WeatherDTO {
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long id;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String city;
